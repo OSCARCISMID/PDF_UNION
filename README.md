@@ -1,2 +1,2 @@
 # PDF_UNION
-Une pdfs, inserta membrete y compagina documento
+Une PDFs, inserta un membrete y permite numerar las páginas del documento

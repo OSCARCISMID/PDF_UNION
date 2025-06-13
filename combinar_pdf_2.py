@@ -1,6 +1,8 @@
 import PyPDF2
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from io import BytesIO
+from reportlab.pdfgen import canvas
 
 def seleccionar_pdf_combinar():
     """
@@ -28,6 +30,20 @@ def seleccionar_membrete():
         global pdf_membrete
         pdf_membrete = archivo
         etiqueta_membrete.config(text=f"Membrete seleccionado:\n{archivo}")
+
+def crear_pagina_numeracion(numero, total, width, height):
+    """Crea un PDF de una sola página con la numeración indicada."""
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=(width, height))
+    texto = f"Página {numero} de {total}"
+    c.setFont("Helvetica", 12)
+    text_width = c.stringWidth(texto, "Helvetica", 12)
+    x = width - text_width - 40
+    y = 20
+    c.drawString(x, y, texto)
+    c.save()
+    buffer.seek(0)
+    return buffer
 
 def procesar_y_guardar():
     """
@@ -77,7 +93,20 @@ def procesar_y_guardar():
             messagebox.showerror("Error", f"No se pudo aplicar el membrete:\n{e}")
             return
 
-    # Paso 3: Guardar el PDF final
+    # Paso 3 (opcional): Agregar numeración de páginas
+    if numerar_paginas_var.get():
+        paginas_temporales = pdf_combinado.pages[:]
+        pdf_combinado = PyPDF2.PdfWriter()
+        total_paginas = len(paginas_temporales)
+        for indice, pagina in enumerate(paginas_temporales, start=1):
+            width = float(pagina.mediabox.width)
+            height = float(pagina.mediabox.height)
+            buffer = crear_pagina_numeracion(indice, total_paginas, width, height)
+            numero = PyPDF2.PdfReader(buffer).pages[0]
+            pagina.merge_page(numero)
+            pdf_combinado.add_page(pagina)
+
+    # Paso 4: Guardar el PDF final
     ruta_salida = filedialog.asksaveasfilename(
         defaultextension=".pdf",
         filetypes=[("Archivos PDF", "*.pdf")],
@@ -102,6 +131,7 @@ def limpiar_lista():
 
 # Variable global para almacenar la ruta del PDF de membrete (None si no se ha seleccionado)
 pdf_membrete = None
+numerar_paginas_var = tk.BooleanVar(value=False)
 
 # Crear ventana principal
 ventana = tk.Tk()
@@ -113,7 +143,8 @@ etiqueta_instrucciones = tk.Label(
     ventana,
     text="1) Selecciona los PDFs a combinar.\n"
          "2) (Opcional) Selecciona un PDF para usar como membrete.\n"
-         "3) Haz clic en 'Procesar y Guardar' para generar el PDF final.",
+         "3) (Opcional) Activa la numeración de páginas.\n"
+         "4) Haz clic en 'Procesar y Guardar' para generar el PDF final.",
     font=("Helvetica", 11),
     justify=tk.LEFT
 )
@@ -143,6 +174,13 @@ boton_procesar = tk.Button(
     command=procesar_y_guardar
 )
 boton_procesar.grid(row=0, column=2, padx=5, pady=5)
+
+check_numeracion = tk.Checkbutton(
+    frame_botones,
+    text="Agregar numeración",
+    variable=numerar_paginas_var
+)
+check_numeracion.grid(row=1, column=0, columnspan=3, pady=5)
 
 # Lista para mostrar los PDFs seleccionados
 lista_archivos = tk.Listbox(ventana, selectmode=tk.MULTIPLE, width=80)

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from io import BytesIO
 from reportlab.pdfgen import canvas
+import copy
 
 def seleccionar_pdf_combinar():
     """
@@ -83,8 +84,8 @@ def procesar_y_guardar():
             pdf_combinado = pypdf.PdfWriter()
             
             for pagina in paginas_temporales:
-                # Clonamos la página original para no modificar el objeto original
-                pagina_clon = pagina.copy()
+                # Clonamos la página para no modificar el objeto original
+                pagina_clon = copy.copy(pagina)
                 # Mergeamos la página de fondo en la página clonada
                 pagina_clon.merge_page(pagina_fondo)
                 # Agregamos la página resultante al writer

@@ -37,8 +37,8 @@ def crear_pagina_numeracion(numero, total, width, height):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=(width, height))
     texto = f"Página {numero} de {total}"
-    c.setFont("Helvetica", 12)
-    text_width = c.stringWidth(texto, "Helvetica", 12)
+    c.setFont("Helvetica", 10)
+    text_width = c.stringWidth(texto, "Helvetica", 10)
     x = width - text_width - 40
     y = 20
     c.drawString(x, y, texto)
@@ -126,9 +126,12 @@ def procesar_y_guardar():
 
 def limpiar_lista():
     """
-    Limpia la lista de archivos seleccionados.
+    Limpia la lista de archivos seleccionados y reinicia el membrete.
     """
     lista_archivos.delete(0, tk.END)
+    global pdf_membrete
+    pdf_membrete = None
+    etiqueta_membrete.config(text="Membrete seleccionado:\nNinguno")
 
 # Variable global para almacenar la ruta del PDF de membrete (None si no se ha seleccionado)
 pdf_membrete = None

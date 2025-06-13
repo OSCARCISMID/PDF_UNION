@@ -131,12 +131,14 @@ def limpiar_lista():
 
 # Variable global para almacenar la ruta del PDF de membrete (None si no se ha seleccionado)
 pdf_membrete = None
-numerar_paginas_var = tk.BooleanVar(value=False)
 
 # Crear ventana principal
 ventana = tk.Tk()
 ventana.title("Combinar y Membretear PDF")
 ventana.geometry("650x450")
+
+# Variable para controlar la numeración de páginas
+numerar_paginas_var = tk.BooleanVar(master=ventana, value=False)
 
 # Etiquetas instructivas
 etiqueta_instrucciones = tk.Label(

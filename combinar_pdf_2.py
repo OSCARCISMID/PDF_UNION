@@ -1,4 +1,4 @@
-import PyPDF2
+import pypdf
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from io import BytesIO
@@ -57,13 +57,13 @@ def procesar_y_guardar():
         return
 
     # Paso 1: Combinar todos los PDFs seleccionados en uno solo
-    pdf_combinado = PyPDF2.PdfWriter()
+    pdf_combinado = pypdf.PdfWriter()
     for ruta_pdf in archivos_pdf:
         try:
-            lector = PyPDF2.PdfReader(ruta_pdf)
+            lector = pypdf.PdfReader(ruta_pdf)
             for pagina in lector.pages:
                 pdf_combinado.add_page(pagina)
-        except PyPDF2.errors.PdfReadError:
+        except pypdf.errors.PdfReadError:
             messagebox.showerror("Error", f"No se pudo leer el archivo PDF: {ruta_pdf}")
             return
 
@@ -71,7 +71,7 @@ def procesar_y_guardar():
     #    Para ello iteramos sobre cada página combinada y la 'mergeamos' con la primera página del membrete.
     if pdf_membrete is not None:
         try:
-            lector_membrete = PyPDF2.PdfReader(pdf_membrete)
+            lector_membrete = pypdf.PdfReader(pdf_membrete)
             # Tomamos la primera página del PDF de membrete
             pagina_fondo = lector_membrete.pages[0]
             
@@ -80,11 +80,11 @@ def procesar_y_guardar():
             paginas_temporales = pdf_combinado.pages[:]
             
             # Limpiamos el PdfWriter para volver a llenarlo con las páginas ya fusionadas
-            pdf_combinado = PyPDF2.PdfWriter()
+            pdf_combinado = pypdf.PdfWriter()
             
             for pagina in paginas_temporales:
                 # Clonamos la página original para no modificar el objeto original
-                pagina_clon = pagina
+                pagina_clon = pagina.copy()
                 # Mergeamos la página de fondo en la página clonada
                 pagina_clon.merge_page(pagina_fondo)
                 # Agregamos la página resultante al writer
@@ -96,13 +96,13 @@ def procesar_y_guardar():
     # Paso 3 (opcional): Agregar numeración de páginas
     if numerar_paginas_var.get():
         paginas_temporales = pdf_combinado.pages[:]
-        pdf_combinado = PyPDF2.PdfWriter()
+        pdf_combinado = pypdf.PdfWriter()
         total_paginas = len(paginas_temporales)
         for indice, pagina in enumerate(paginas_temporales, start=1):
             width = float(pagina.mediabox.width)
             height = float(pagina.mediabox.height)
             buffer = crear_pagina_numeracion(indice, total_paginas, width, height)
-            numero = PyPDF2.PdfReader(buffer).pages[0]
+            numero = pypdf.PdfReader(buffer).pages[0]
             pagina.merge_page(numero)
             pdf_combinado.add_page(pagina)
 
